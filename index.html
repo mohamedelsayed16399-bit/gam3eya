@@ -57,6 +57,7 @@ body.dk .stat b{color:#7fe0bf}body.dk h2,body.dk .mh{color:var(--t)}body.dk .mon
 .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;background:#e8efe9;color:var(--g2)}.tabs button.on{background:var(--g);color:#fff}
 body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{background:var(--g);color:#fff}
 .mem{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #cfd6d1;gap:8px}
+.sc{font-size:12px;border-radius:10px;padding:1px 8px;margin-right:6px;font-weight:700}.sc.g{background:#d9f3e6;color:#0a5a46}.sc.m{background:#fff1c9;color:#7a5a00}.sc.b{background:#fbe0e0;color:#a32727}.mvb{display:flex;gap:2px;align-items:center}
 .mem small{color:var(--m);display:block}.mem button{padding:7px 10px;font-size:13px;flex:none}
 .top{display:flex;gap:8px;margin-bottom:12px}.top select{flex:3}.top button{flex:1;padding:8px}
 .rc{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:8px;color:var(--m)}
@@ -158,7 +159,7 @@ $("names").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined){delete phone
 $("demo").onclick=()=>{const m=["أحمد","سارة","محمود","منى","يوسف","هدى"];const p={};const d=now.getDate();
  for(let mi=0;mi<2;mi++)m.forEach((_,u)=>{if(!(mi===1&&u>3))p[mi+"_"+u]=1});
  const d0=new Date(now.getFullYear(),now.getMonth()-1,1);
- st={n:"جمعية الشلة (مثال)",a:1000,start:d0.getFullYear()+"-"+String(d0.getMonth()+1).padStart(2,"0"),m:m,o:[2,0,4,1,5,3,1],s:{"سارة":2},p:p,r:{0:1},ph:{"يوسف":"01012345678"},d:Math.min(d,28)};
+ st={n:"جمعية الشلة (مثال)",a:1000,start:d0.getFullYear()+"-"+String(d0.getMonth()+1).padStart(2,"0"),m:m,o:[2,0,4,1,5,3,1],s:{"سارة":2},p:p,r:{0:1},ph:{"يوسف":"01012345678"},d:1};
  db.cur=null;save();fillSw();show();window.scrollTo(0,0)};
 $("go").onclick=()=>{
  const amt=+$("gamt").value;
@@ -205,12 +206,12 @@ $("months").onclick=e=>{
   b.classList.toggle("hide")}
 };
 function renderMembers(){
- const n=st.m.length,k=K(),ci=Math.min(curIdx(),k-1);let h="<h2>حساب كل عضو</h2>";
+ const n=st.m.length,k=K(),ci=Math.min(curIdx(),k-1);let h="<h2>حساب كل عضو</h2><p class=\"hint\">نسبة الالتزام = الأقساط اللي اتدفعت من اللي ميعادها جه. 🏅 يعني ملتزم 100٪.</p>";
  st.m.forEach((u,ui)=>{let paid=0,due=0;for(let mi=0;mi<k;mi++){if(st.p[mi+"_"+ui])paid++;else if(mi<=lastDue(ci))due++}
-  const pos=st.o.indexOf(ui),poss=st.o.map((x,i)=>x===ui?mlabel(i):null).filter(Boolean).join(" و");const ph=st.ph[u];
-  h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${poss} | دفع ${nf(paid)} من ${nf(k)}</small><small>${due?"متأخر عليه "+nf(due)+" "+U()+" = "+nf(due*st.a*sh(ui))+" ج"+(st.fee?" + غرامة "+nf(due*st.fee)+" ج = "+nf(due*(st.a*sh(ui)+st.fee))+" ج":""):"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}<button class="sec" data-mv="${ui}_-1" title="قدّم دوره">▲</button><button class="sec" data-mv="${ui}_1" title="أخّر دوره">▼</button></div></div>`});
+  let dueN=0,okN=0;for(let mi=0;mi<=lastDue(ci);mi++){dueN++;if(st.p[mi+"_"+ui])okN++}const score=dueN?Math.round(okN/dueN*100):100;const badge=score===100?"🏅":score>=70?"👍":"⚠️";const pos=st.o.indexOf(ui),poss=st.o.map((x,i)=>x===ui?mlabel(i):null).filter(Boolean).join(" و");const ph=st.ph[u];
+  h+=`<div class="mem"><div><b>${esc(u)}</b> <span class="sc ${score===100?"g":score>=70?"m":"b"}">${badge} التزام ${nf(score)}٪</span><small>دوره: ${poss} | دفع ${nf(paid)} من ${nf(k)}</small><small>${due?"متأخر عليه "+nf(due)+" "+U()+" = "+nf(due*st.a*sh(ui))+" ج"+(st.fee?" + غرامة "+nf(due*st.fee)+" ج = "+nf(due*(st.a*sh(ui)+st.fee))+" ج":""):"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}${st.o.map((x,p)=>x===ui?`<span class="mvb"><button class="sec" data-mv="${p}_-1" title="قدّم ${mlabel(p)}">▲</button><button class="sec" data-mv="${p}_1" title="أخّر ${mlabel(p)}">▼</button>${st.o.length>st.m.length?`<small class="hint">${nf(p+1)}</small>`:""}</span>`:"").join("")}</div></div>`});
  $("members").innerHTML=h}
-$("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [u,dir]=mv.dataset.mv.split("_").map(Number);const a=st.o.indexOf(u),b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");snap();[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
+$("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [a,dir]=mv.dataset.mv.split("_").map(Number);const b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");snap();[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
  const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),K()-1);let due=0;for(let mi=0;mi<=lastDue(ci);mi++)if(!st.p[mi+"_"+ui])due++;
  const t=`السلام عليكم يا ${u}، تذكير بسيط بقسط ${st.n}: عليك ${nf(due)} ${U()} (${nf(due*st.a*sh(ui))} جنيه${st.fee?" + غرامة "+nf(due*st.fee):""}). ربنا يبارك فيك 🤝`;
  window.open("https://wa.me/"+String(st.ph[u]).replace(/^0/,"20").replace(/\D/g,"")+"?text="+encodeURIComponent(t),"_blank")};
