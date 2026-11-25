@@ -7,7 +7,8 @@
 <meta name="description" content="نظّم جمعيتك مع أصحابك: قرعة، دور كل واحد، مين دفع ومين لسه، وابعت الكشف على واتساب.">
 <meta property="og:title" content="جمعيتي - دفتر الجمعية الذكي">
 <meta property="og:description" content="قرعة، دور كل واحد، مين دفع ومين لسه. ببلاش وبدون تسجيل.">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D8%AC%D9%85%D8%B9%D9%8A%D8%AA%D9%8A%22%2C%22short_name%22%3A%22%D8%AC%D9%85%D8%B9%D9%8A%D8%AA%D9%8A%22%2C%22display%22%3A%22standalone%22%2C%22dir%22%3A%22rtl%22%2C%22lang%22%3A%22ar%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f1e8%22%2C%22theme_color%22%3A%22%230f7b5f%22%7D">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D8%AC%D9%85%D8%B9%D9%8A%D8%AA%D9%8A%22%2C%22short_name%22%3A%22%D8%AC%D9%85%D8%B9%D9%8A%D8%AA%D9%8A%22%2C%22display%22%3A%22standalone%22%2C%22dir%22%3A%22rtl%22%2C%22lang%22%3A%22ar%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f1e8%22%2C%22theme_color%22%3A%22%230f7b5f%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage/svg%2Bxml%2C%253Csvg%2520xmlns%253D%2522http%253A//www.w3.org/2000/svg%2522%2520viewBox%253D%25220%25200%2520512%2520512%2522%253E%253Crect%2520width%253D%2522512%2522%2520height%253D%2522512%2522%2520rx%253D%2522110%2522%2520fill%253D%2522%25230f7b5f%2522/%253E%253Ctext%2520x%253D%2522256%2522%2520y%253D%2522330%2522%2520font-size%253D%2522260%2522%2520text-anchor%253D%2522middle%2522%253E%25F0%259F%25A4%259D%253C/text%253E%253C/svg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image/svg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22110%22%20fill%3D%22%230f7b5f%22/%3E%3Ctext%20x%3D%22256%22%20y%3D%22330%22%20font-size%3D%22260%22%20text-anchor%3D%22middle%22%3E%F0%9F%A4%9D%3C/text%3E%3C/svg%3E">
 <meta name="theme-color" content="#0f7b5f">
 <style>
 :root{--g:#0f7b5f;--g2:#0a5a46;--y:#f5b82e;--bg:#f4f1e8;--c:#fff;--t:#1d2b27;--m:#6b7a75;--r:#d64545}
@@ -65,6 +66,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <header><h1>🤝 جمعيتي</h1><p>دفتر الجمعية بتاعك. قرعة، أدوار، ومين دفع. ببلاش وبدون تسجيل.</p></header>
 <main>
 <div class="top noprint"><select id="sw"></select><button id="newc" class="sec">+ جديدة</button><button id="dk" class="sec">🌙</button></div>
+<button id="inst" class="y noprint hide" style="width:100%;margin-bottom:12px">📲 ثبّت جمعيتي على موبايلك</button>
 <div id="ro" class="ro hide">🔒 ده كشف للقراءة فقط جاي من صاحب الجمعية. اللي تعدله هنا مش بيتحفظ. <button id="cp" class="sec" style="margin-top:6px;width:100%">احفظ نسخة عندي أعدّل عليها</button></div>
 
 <section id="how" class="card"><h2>إزاي الجمعية بتشتغل؟</h2><p class="hint" style="font-size:14px;margin:0">كل واحد بيدفع نفس المبلغ كل شهر، وكل شهر واحد بيقبض الإجمالي. بعد ما كل الأعضاء يقبضوا، الجمعية بتخلص. هنا بتعمل القرعة، وتتابع مين دفع ومين لسه، وتبعت كشف واضح للجروب بدل ما كله يسأل "مين دفع؟".</p></section>
@@ -249,6 +251,7 @@ $("rst").onclick=()=>{if(confirm("متأكد؟ هتمسح الجمعية دي م
  if(m){try{st=dec(m[1]);ro=true;$("ro").classList.remove("hide");show();return}catch(e){}}
  loadDb();fillSw();if(db.cur&&db.l[db.cur]){st=db.l[db.cur];show()}
 })();
+let dip=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dip=e;$("inst").classList.remove("hide")});$("inst").onclick=async()=>{if(!dip)return;dip.prompt();await dip.userChoice;dip=null;$("inst").classList.add("hide")};
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
