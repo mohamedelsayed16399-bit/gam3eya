@@ -71,6 +71,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <label>اسم الجمعية</label><input id="gname" placeholder="مثلاً: جمعية الشلة">
 <div class="row"><div><label>المبلغ الشهري لكل واحد (جنيه)</label><input id="gamt" type="number" inputmode="numeric" placeholder="1000"></div>
 <div><label>تبدأ من شهر</label><input id="gstart" type="month"></div></div>
+<label>ميعاد القسط كل شهر (يوم)</label><select id="gdue"></select>
 <label>الأعضاء (اكتب الاسم، ولو عايز تفكّر المتأخر على واتساب اكتب رقمه بعد الاسم: سارة 01012345678)</label>
 <div class="row"><input id="nm" placeholder="اسم العضو" style="flex:3"><button id="addn" class="sec" style="flex:1">+ إضافة</button></div>
 <div id="names" class="names"></div>
@@ -78,6 +79,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <label>ترتيب القبض</label>
 <select id="ord"><option value="rand">قرعة عشوائية 🎲</option><option value="list">زي ترتيب الكتابة</option></select>
 <button id="go" style="width:100%;margin-top:14px">ابدأ الجمعية</button>
+<button id="demo" class="sec" style="width:100%;margin-top:8px">🎯 جرّب بمثال جاهز</button>
 </section>
 
 <section id="draw" class="card hide"><h2>🎲 القرعة</h2><div id="dtxt" class="draw">...</div></section>
@@ -107,6 +109,7 @@ const nf=n=>Number(n).toLocaleString("ar-EG");
 const KEY="gam3eya_v1";
 let phones={},st=null,names=[],ro=false,open=new Set();
 const now=new Date();
+$("gdue").innerHTML=Array.from({length:28},(_,i)=>`<option value="${i+1}" ${i===0?"selected":""}>يوم ${i+1}</option>`).join("");
 $("gstart").value=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
 function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function dec(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";return JSON.parse(decodeURIComponent(escape(atob(s))))}
@@ -118,19 +121,27 @@ $("sw").onchange=()=>{db.cur=$("sw").value;st=db.l[db.cur];localStorage.setItem(
 $("newc").onclick=()=>{if(ro){location.href=location.pathname;return}db.cur=null;st=null;names=[];renderNames();$("app").classList.add("hide");$("setup").classList.remove("hide");window.scrollTo(0,0)};
 $("dk").onclick=()=>{document.body.classList.toggle("dk");try{localStorage.setItem("g_dk",document.body.classList.contains("dk")?1:0)}catch(e){}};
 try{if(localStorage.getItem("g_dk")==="1")document.body.classList.add("dk")}catch(e){}
-function mlabel(i){const [y,m]=st.start.split("-").map(Number);const d=new Date(y,m-1+i,1);return AR[d.getMonth()]+" "+d.getFullYear()}
+function mlabel(i){const [y,m]=st.start.split("-").map(Number);const d=new Date(y,m-1+i,1);return AR[d.getMonth()]+" "+String(d.getFullYear()).replace(/\d/g,x=>"٠١٢٣٤٥٦٧٨٩"[x])}
+function lastDue(ci){return (st.d&&ci>=0&&now.getDate()<=st.d)?ci-1:ci}
+function dueLine(ci,n){if(ci<0)return "الجمعية لسه ما بدأتش";if(ci>=n)return "الجمعية خلصت 🎉";const dd=st.d||1;const dt=new Date(now.getFullYear(),now.getMonth(),dd);const diff=Math.round((dt-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);
+ return diff>0?`ميعاد القسط يوم ${nf(dd)}، باقي ${nf(diff)} يوم ⏳`:diff===0?"النهارده ميعاد القسط 📅":`ميعاد القسط كان يوم ${nf(dd)}، عدّى ${nf(-diff)} يوم ⚠️`}
 function curIdx(){const [y,m]=st.start.split("-").map(Number);const i=(now.getFullYear()-y)*12+now.getMonth()-(m-1);return i}
 function renderNames(){$("names").innerHTML=names.map((n,i)=>`<span class="chip">${esc(n)} <b data-i="${i}">×</b></span>`).join("")}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function addName(){let v=$("nm").value.trim();if(!v)return;const mm=v.match(/^(.*?)[\s:،-]*([0-9٠-٩+]{8,15})$/);if(mm&&mm[1].trim()){const ph=mm[2].replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));phones[mm[1].trim()]=ph;v=mm[1].trim()}if(names.includes(v)){$("nm").value="";return}names.push(v);$("nm").value="";renderNames();$("nm").focus()}
 $("addn").onclick=addName;$("nm").onkeydown=e=>{if(e.key==="Enter")addName()};
 $("names").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined){delete phones[names[+i]];names.splice(+i,1);renderNames()}};
+$("demo").onclick=()=>{const m=["أحمد","سارة","محمود","منى","يوسف","هدى"];const p={};const d=now.getDate();
+ for(let mi=0;mi<2;mi++)m.forEach((_,u)=>{if(!(mi===1&&u>3))p[mi+"_"+u]=1});
+ const d0=new Date(now.getFullYear(),now.getMonth()-1,1);
+ st={n:"جمعية الشلة (مثال)",a:1000,start:d0.getFullYear()+"-"+String(d0.getMonth()+1).padStart(2,"0"),m:m,o:[2,0,4,1,5,3],p:p,r:{0:1},ph:{"يوسف":"01012345678"},d:Math.min(d,28)};
+ db.cur=null;save();fillSw();show();window.scrollTo(0,0)};
 $("go").onclick=()=>{
  const amt=+$("gamt").value;
  if(names.length<2)return alert("ضيف عضوين على الأقل");
  if(!(amt>0))return alert("اكتب المبلغ الشهري");
  const order=names.map((_,i)=>i);
- const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones};save();fillSw();show()};
+ const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones,d:+$("gdue").value};save();fillSw();show()};
  if($("ord").value==="rand"){
   for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
   $("setup").classList.add("hide");$("draw").classList.remove("hide");
@@ -144,11 +155,11 @@ function show(){
  $("title").textContent=st.n+" · "+nf(n)+" أعضاء";
  $("s1").textContent=nf(st.a*n)+" ج";
  $("s2").textContent=ci<0?"لسه":ci>=n?"خلصت":nf(ci+1)+" من "+nf(n);
- let late=0;for(let mi=0;mi<n&&mi<=ci;mi++)late+=n-paidCount(mi);
+ let late=0;for(let mi=0;mi<n&&mi<=lastDue(ci);mi++)late+=n-paidCount(mi);
  $("s3").textContent=nf(late);
  let tot=0;for(let mi=0;mi<n;mi++)tot+=paidCount(mi);
  $("bar").style.width=Math.round(tot/(n*n)*100)+"%";
- $("barT").textContent="اتدفع "+nf(tot)+" دفعة من "+nf(n*n);
+ $("barT").innerHTML="اتجمع "+nf(tot*st.a)+" ج من "+nf(n*n*st.a)+" ج ("+nf(tot)+" دفعة من "+nf(n*n)+")<br><b>"+dueLine(ci,n)+"</b>";
  let h="";
  for(let mi=0;mi<n;mi++){
   const rcv=st.m[st.o[mi]],pc=paidCount(mi),full=pc===n,isCur=mi===ci;
@@ -169,11 +180,12 @@ $("months").onclick=e=>{
 };
 function renderMembers(){
  const n=st.m.length,ci=Math.min(curIdx(),n-1);let h="<h2>حساب كل عضو</h2>";
- st.m.forEach((u,ui)=>{let paid=0,due=0;for(let mi=0;mi<n;mi++){if(st.p[mi+"_"+ui])paid++;else if(mi<=ci)due++}
+ st.m.forEach((u,ui)=>{let paid=0,due=0;for(let mi=0;mi<n;mi++){if(st.p[mi+"_"+ui])paid++;else if(mi<=lastDue(ci))due++}
   const pos=st.o.indexOf(ui);const ph=st.ph[u];
-  h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${mlabel(pos)} · دفع ${nf(paid)} من ${nf(n)}</small><small>${due?"متأخر عليه "+nf(due)+" شهر = "+nf(due*st.a)+" ج":"مفيش متأخرات ✅"}</small></div>${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}</div>`});
+  h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${mlabel(pos)} · دفع ${nf(paid)} من ${nf(n)}</small><small>${due?"متأخر عليه "+nf(due)+" شهر = "+nf(due*st.a)+" ج":"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}<button class="sec" data-mv="${ui}_-1" title="قدّم دوره">▲</button><button class="sec" data-mv="${ui}_1" title="أخّر دوره">▼</button></div></div>`});
  $("members").innerHTML=h}
-$("members").onclick=e=>{const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),n-1);let due=0;for(let mi=0;mi<=ci;mi++)if(!st.p[mi+"_"+ui])due++;
+$("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [u,dir]=mv.dataset.mv.split("_").map(Number);const a=st.o.indexOf(u),b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
+ const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),n-1);let due=0;for(let mi=0;mi<=lastDue(ci);mi++)if(!st.p[mi+"_"+ui])due++;
  const t=`السلام عليكم يا ${u}، تذكير بسيط بقسط ${st.n}: عليك ${nf(due)} شهر (${nf(due*st.a)} جنيه). ربنا يبارك فيك 🤝`;
  window.open("https://wa.me/"+String(st.ph[u]).replace(/^0/,"20").replace(/\D/g,"")+"?text="+encodeURIComponent(t),"_blank")};
 $("t1").onclick=()=>{$("months").classList.remove("hide");$("members").classList.add("hide");$("t1").classList.add("on");$("t2").classList.remove("on")};
