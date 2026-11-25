@@ -47,6 +47,7 @@ button:active{transform:scale(.97)}
 .hint{font-size:12.5px;color:var(--m)}
 .ro{background:#fff7dd;border:1.5px solid var(--y);border-radius:12px;padding:10px;font-size:13px;margin-bottom:12px}
 .hide{display:none}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f7b5f;color:#fff;padding:12px 20px;border-radius:30px;font-weight:700;box-shadow:0 4px 16px #0004;transition:.35s;z-index:9;opacity:0}#toast.on{transform:translateX(-50%) translateY(0);opacity:1}
 footer{text-align:center;color:var(--m);font-size:12px;padding:0 0 30px}
 body.dk{--bg:#101a17;--c:#1a2824;--t:#e6efeb;--m:#93a8a0}
 body.dk input,body.dk select{background:#14201c;color:var(--t);border-color:#2c403a}
@@ -108,6 +109,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 </div>
 </section>
 </main>
+<div id="toast"></div>
 <footer>جمعيتي | نصيحة: اكتب شروط الجمعية مع أصحابك قبل ما تبدأ</footer>
 <script>
 const $=id=>document.getElementById(id);
@@ -135,6 +137,8 @@ function U(){return st.f==="w"?"أسبوع":"شهر"}
 function dn(x){return String(x).replace(/\d/g,y=>"٠١٢٣٤٥٦٧٨٩"[y])}
 function sd0(){const [y,m,d]=st.sd.split("-").map(Number);return new Date(y,m-1,d)}
 function mlabel(i){if(st.f==="w"){const d=sd0();d.setDate(d.getDate()+7*i);return "أسبوع "+dn(i+1)+" ("+dn(d.getDate()+"/"+(d.getMonth()+1))+")"}const [y,m]=st.start.split("-").map(Number);const d=new Date(y,m-1+i,1);return AR[d.getMonth()]+" "+String(d.getFullYear()).replace(/\d/g,x=>"٠١٢٣٤٥٦٧٨٩"[x])}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2600);try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}}
+function chk(mi){if(paidCount(mi)===st.m.length){const all=Array.from({length:K()},(_,i)=>paidCount(i)===st.m.length).every(Boolean);toast(all?"🏁 الجمعية كلها اتقفلت. مبروك لكل الأعضاء!":"🎉 الكل دفع "+mlabel(mi)+"!")}}
 function K(){return st.o.length}
 function sh(u){return (st.s&&st.s[st.m[u]])||1}
 function pot(){let t=0;st.m.forEach((_,u)=>t+=sh(u));return t*st.a}
@@ -187,10 +191,10 @@ function show(){
  $("months").innerHTML=h;
 }
 $("months").onclick=e=>{
- const ma=e.target.closest("[data-all]");if(ma){snap();const mi=ma.dataset.all;const full=paidCount(+mi)===st.m.length;st.m.forEach((_,u)=>{if(full)delete st.p[mi+"_"+u];else st.p[mi+"_"+u]=1});save();show();return}
+ const ma=e.target.closest("[data-all]");if(ma){snap();const mi=ma.dataset.all;const full=paidCount(+mi)===st.m.length;st.m.forEach((_,u)=>{if(full)delete st.p[mi+"_"+u];else st.p[mi+"_"+u]=1});save();show();chk(+mi);return}
  const rg=e.target.closest("[data-r]");if(rg){snap();const k=rg.dataset.r;if(st.r[k])delete st.r[k];else st.r[k]=1;save();show();return}
  const tg=e.target.closest(".tg");
- if(tg){snap();const k=tg.dataset.k;if(st.p[k])delete st.p[k];else st.p[k]=1;save();show();return}
+ if(tg){snap();const k=tg.dataset.k;if(st.p[k])delete st.p[k];else st.p[k]=1;save();show();chk(+k.split("_")[0]);return}
  const mh=e.target.closest(".mh");
  if(mh){const mi=+mh.dataset.m,ci=curIdx(),cur=mi===ci;const b=mh.nextElementSibling;const isOpen=!b.classList.contains("hide");
   if(isOpen){open.delete(mi);if(cur)open.add("x"+mi)}else{open.add(mi);open.delete("x"+mi)}
