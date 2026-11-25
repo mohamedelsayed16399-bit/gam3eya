@@ -102,7 +102,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 </div>
 <div class="tabs noprint"><button id="t1" class="on">الشهور</button><button id="t2">الأعضاء</button></div>
 <div id="rules" class="ro noprint hide" style="background:#eef7f2;border-color:#9fd3bd"></div>
-<div class="row noprint" style="margin-bottom:10px"><button id="undo" class="sec">↩️ تراجع</button><button id="img" class="sec">🖼️ صورة الكشف</button></div>
+<div class="row noprint" style="margin-bottom:10px"><button id="undo" class="sec">↩️ تراجع</button><button id="img" class="sec">🖼️ صورة الكشف</button><button id="mth" class="sec">📜 ميثاق الجمعية</button></div>
 <div id="months"></div><div id="members" class="card hide"></div>
 <div class="card noprint">
 <h2>مشاركة</h2>
@@ -211,7 +211,7 @@ function renderMembers(){
  const n=st.m.length,k=K(),ci=Math.min(curIdx(),k-1);let h="<h2>حساب كل عضو</h2><p class=\"hint\">نسبة الالتزام = الأقساط اللي اتدفعت من اللي ميعادها جه. 🏅 يعني ملتزم 100٪.</p>";
  st.m.forEach((u,ui)=>{let paid=0,due=0;for(let mi=0;mi<k;mi++){if(st.p[mi+"_"+ui])paid++;else if(mi<=lastDue(ci))due++}
   let dueN=0,okN=0;for(let mi=0;mi<=lastDue(ci);mi++){dueN++;if(st.p[mi+"_"+ui])okN++}const score=dueN?Math.round(okN/dueN*100):100;const badge=score===100?"🏅":score>=70?"👍":"⚠️";const pos=st.o.indexOf(ui),poss=st.o.map((x,i)=>x===ui?mlabel(i):null).filter(Boolean).join(" و");const ph=st.ph[u];
-  h+=`<div class="mem"><div><b>${esc(u)}</b> <span class="sc ${score===100?"g":score>=70?"m":"b"}">${badge} التزام ${nf(score)}٪</span><small>دوره: ${poss} | دفع ${nf(paid)} من ${nf(k)}</small><small>${due?"متأخر عليه "+nf(due)+" "+U()+" = "+nf(due*st.a*sh(ui))+" ج"+(st.fee?" + غرامة "+nf(due*st.fee)+" ج = "+nf(due*(st.a*sh(ui)+st.fee))+" ج":""):"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}${st.o.map((x,p)=>x===ui?`<span class="mvb"><button class="sec" data-mv="${p}_-1" title="قدّم ${mlabel(p)}">▲</button><button class="sec" data-mv="${p}_1" title="أخّر ${mlabel(p)}">▼</button>${st.o.length>st.m.length?`<small class="hint">${nf(p+1)}</small>`:""}</span>`:"").join("")}</div></div>`});
+  h+=`<div class="mem"><div><b>${esc(u)}</b> <span class="sc ${score===100?"g":score>=70?"m":"b"}">${badge} التزام ${nf(score)}٪</span><small>دوره: ${poss} | دفع ${nf(paid)} من ${nf(k)}</small><small>${due?"متأخر عليه "+nf(due)+" "+U()+" = "+nf(due*st.a*sh(ui))+" ج"+(st.fee?" + غرامة "+nf(due*st.fee)+" ج = "+nf(due*(st.a*sh(ui)+st.fee))+" ج":""):"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}<button data-rc="${ui}" class="sec" title="إيصال">🧾</button>${st.o.map((x,p)=>x===ui?`<span class="mvb"><button class="sec" data-mv="${p}_-1" title="قدّم ${mlabel(p)}">▲</button><button class="sec" data-mv="${p}_1" title="أخّر ${mlabel(p)}">▼</button>${st.o.length>st.m.length?`<small class="hint">${nf(p+1)}</small>`:""}</span>`:"").join("")}</div></div>`});
  $("members").innerHTML=h}
 $("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [a,dir]=mv.dataset.mv.split("_").map(Number);const b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");snap();[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
  const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),K()-1);let due=0;for(let mi=0;mi<=lastDue(ci);mi++)if(!st.p[mi+"_"+ui])due++;
@@ -239,6 +239,29 @@ $("bak").onclick=()=>{const b=new Blob([JSON.stringify(ro?{cur:"c1",l:{c1:st}}:d
 $("rstr").onclick=()=>$("rf").click();
 $("rf").onchange=()=>{const f=$("rf").files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.l)throw 0;let c=0;Object.keys(x.l).forEach(k=>{const id="c"+Date.now()+Math.random().toString(36).slice(2,6);db.l[id]=x.l[k];db.cur=id;c++});localStorage.setItem(KEY+"_db",JSON.stringify(db));alert("اتسترجع "+c+" جمعية");location.hash="";location.reload()}catch(e){alert("الملف ده مش نسخة جمعيتي")}};rd.readAsText(f)};
 $("cp").onclick=()=>{loadDb();const id="c"+Date.now()+Math.random().toString(36).slice(2,6);db.l[id]=JSON.parse(JSON.stringify(st));db.cur=id;localStorage.setItem(KEY+"_db",JSON.stringify(db));location.href=location.pathname};
+function shareC(c,name,text){c.toBlob(async b=>{const f=new File([b],name,{type:"image/png"});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:text||st.n});return}}catch(e){}const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click()})}
+function mk(W,H){const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";x.textAlign="right";x.fillStyle="#fffdf6";x.fillRect(0,0,W,H);x.fillStyle="#0f7b5f";x.fillRect(0,0,W,120);x.fillStyle="#f5b82e";x.fillRect(0,120,W,8);return [c,x]}
+function wrap(x,t,xr,y,maxw,lh){const words=t.split(" ");let line="";words.forEach(w=>{const tt=line?line+" "+w:w;if(x.measureText(tt).width>maxw&&line){x.fillText(line,xr,y);y+=lh;line=w}else line=tt});if(line){x.fillText(line,xr,y);y+=lh}return y}
+$("mth").onclick=()=>{const K_=K(),rows=K_;const H=470+rows*50+(st.q?110:0);const [c,x]=mk(720,H);const W=720;
+ x.fillStyle="#fff";x.font="bold 40px sans-serif";x.fillText("ميثاق "+st.n,W-40,75);x.font="22px sans-serif";x.fillText("اتفاق الأعضاء على شروط الجمعية",W-40,105);
+ x.fillStyle="#1d2b27";x.font="26px sans-serif";let y=185;
+ const lines=["القسط: "+nf(st.a)+" جنيه للحصة كل "+(st.f==="w"?"أسبوع":"شهر"),"القبضة: "+nf(pot())+" جنيه","عدد الأعضاء: "+nf(st.m.length)+" | عدد "+(st.f==="w"?"الأسابيع":"الشهور")+": "+nf(K_),st.f==="w"?"البداية: "+dn(st.sd):"ميعاد القسط: يوم "+nf(st.d||1)+" من كل شهر"];
+ if(st.fee)lines.push("غرامة التأخير: "+nf(st.fee)+" جنيه لكل فترة");
+ lines.forEach(t=>{x.fillText(t,W-40,y);y+=42});
+ if(st.q){x.fillStyle="#7a5a00";x.font="22px sans-serif";y+=6;y=wrap(x,"الشروط: "+st.q,W-40,y,W-80,32)+10}
+ x.fillStyle="#0f7b5f";x.font="bold 26px sans-serif";x.fillText("جدول القبض",W-40,y+20);y+=60;
+ for(let i=0;i<K_;i++){x.fillStyle=i%2?"#f3f6f3":"#e8efe9";x.fillRect(30,y-32,W-60,46);x.fillStyle="#1d2b27";x.font="24px sans-serif";x.textAlign="right";x.fillText(nf(i+1)+". "+st.m[st.o[i]],W-50,y);x.textAlign="left";x.fillText(mlabel(i),50,y);x.textAlign="right";y+=50}
+ x.fillStyle="#6b7a75";x.font="20px sans-serif";x.textAlign="center";x.fillText("اتعمل بتاريخ "+dn(now.getDate()+"/"+(now.getMonth()+1)+"/"+now.getFullYear())+" | جمعيتي",W/2,H-20);
+ shareC(c,"mithaq.png","ميثاق "+st.n)};
+$("members").addEventListener("click",e=>{const b=e.target.closest("[data-rc]");if(!b)return;const ui=+b.dataset.rc,ci=Math.min(Math.max(curIdx(),0),K()-1);
+ let paid=[];for(let mi=0;mi<K();mi++)if(st.p[mi+"_"+ui])paid.push(mi);if(!paid.length)return toast("العضو ده لسه ما دفعش حاجة");
+ const mi=paid.indexOf(ci)>=0?ci:paid[paid.length-1];const amt=st.a*sh(ui);
+ const [c,x]=mk(720,560);const W=720;x.fillStyle="#fff";x.font="bold 42px sans-serif";x.fillText("إيصال استلام قسط",W-40,70);x.font="22px sans-serif";x.fillText(st.n,W-40,104);
+ x.fillStyle="#1d2b27";x.font="28px sans-serif";let y=200;
+ [["استلمنا من: "+st.m[ui]],["المبلغ: "+nf(amt)+" جنيه"],["عن: "+mlabel(mi)],["القابض في الفترة دي: "+st.m[st.o[mi]]],["التاريخ: "+dn(now.getDate()+"/"+(now.getMonth()+1)+"/"+now.getFullYear())]].forEach(r=>{x.fillText(r[0],W-40,y);y+=52});
+ x.strokeStyle="#0f7b5f";x.lineWidth=4;x.beginPath();x.arc(110,430,62,0,7);x.stroke();x.fillStyle="#0f7b5f";x.font="bold 30px sans-serif";x.textAlign="center";x.fillText("تم الدفع",110,440);
+ x.fillStyle="#6b7a75";x.font="18px sans-serif";x.fillText("رقم "+dn(String(mi+1)+"-"+String(ui+1))+" | جمعيتي",W/2+60,530);
+ shareC(c,"receipt.png",st.m[ui]+" - "+mlabel(mi))});
 $("undo").onclick=()=>{if(!hist.length)return alert("مفيش حاجة تتراجع عنها");const h=JSON.parse(hist.pop());st.p=h.p;st.r=h.r;st.o=h.o;save();show()};
 $("img").onclick=()=>{const n=st.m.length,ci=Math.min(Math.max(curIdx(),0),K()-1);const rows=st.m.map((u,i)=>[u,!!st.p[ci+"_"+i]]);
  const W=720,H=340+rows.length*58,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";x.textAlign="right";
