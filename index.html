@@ -80,6 +80,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <p class="hint">كل عضو بيقبض مرة واحدة، يعني عدد الشهور = عدد الأعضاء.</p>
 <label>ترتيب القبض</label>
 <select id="ord"><option value="rand">قرعة عشوائية 🎲</option><option value="list">زي ترتيب الكتابة</option></select>
+<label>غرامة التأخير لكل فترة تأخير (جنيه، اختياري)</label><input id="gfee" type="number" inputmode="numeric" placeholder="0">
 <label>شروط وملاحظات الجمعية (اختياري)</label><textarea id="grules" rows="2" placeholder="مثلاً: التأخير بعد يوم ٥ بغرامة ٥٠ جنيه. الأمين: أحمد"></textarea>
 <button id="go" style="width:100%;margin-top:14px">ابدأ الجمعية</button>
 <button id="demo" class="sec" style="width:100%;margin-top:8px">🎯 جرّب بمثال جاهز</button>
@@ -156,7 +157,7 @@ $("go").onclick=()=>{
  if(names.length<2)return alert("ضيف عضوين على الأقل");
  if(!(amt>0))return alert("اكتب المبلغ الشهري");
  const order=[];names.forEach((u,i)=>{for(let k=0;k<(shares[u]||1);k++)order.push(i)});
- const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones,d:+$("gdue").value,f:$("gfreq").value,sd:$("gsd").value,s:shares,q:$("grules").value.trim()};save();fillSw();show()};
+ const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones,d:+$("gdue").value,f:$("gfreq").value,fee:+$("gfee").value||0,sd:$("gsd").value,s:shares,q:$("grules").value.trim()};save();fillSw();show()};
  if($("ord").value==="rand"){
   for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
   $("setup").classList.add("hide");$("draw").classList.remove("hide");
@@ -199,11 +200,11 @@ function renderMembers(){
  const n=st.m.length,k=K(),ci=Math.min(curIdx(),k-1);let h="<h2>حساب كل عضو</h2>";
  st.m.forEach((u,ui)=>{let paid=0,due=0;for(let mi=0;mi<k;mi++){if(st.p[mi+"_"+ui])paid++;else if(mi<=lastDue(ci))due++}
   const pos=st.o.indexOf(ui),poss=st.o.map((x,i)=>x===ui?mlabel(i):null).filter(Boolean).join(" و");const ph=st.ph[u];
-  h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${poss} | دفع ${nf(paid)} من ${nf(k)}</small><small>${due?"متأخر عليه "+nf(due)+" "+U()+" = "+nf(due*st.a*sh(ui))+" ج":"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}<button class="sec" data-mv="${ui}_-1" title="قدّم دوره">▲</button><button class="sec" data-mv="${ui}_1" title="أخّر دوره">▼</button></div></div>`});
+  h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${poss} | دفع ${nf(paid)} من ${nf(k)}</small><small>${due?"متأخر عليه "+nf(due)+" "+U()+" = "+nf(due*st.a*sh(ui))+" ج"+(st.fee?" + غرامة "+nf(due*st.fee)+" ج = "+nf(due*(st.a*sh(ui)+st.fee))+" ج":""):"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}<button class="sec" data-mv="${ui}_-1" title="قدّم دوره">▲</button><button class="sec" data-mv="${ui}_1" title="أخّر دوره">▼</button></div></div>`});
  $("members").innerHTML=h}
 $("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [u,dir]=mv.dataset.mv.split("_").map(Number);const a=st.o.indexOf(u),b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");snap();[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
  const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),K()-1);let due=0;for(let mi=0;mi<=lastDue(ci);mi++)if(!st.p[mi+"_"+ui])due++;
- const t=`السلام عليكم يا ${u}، تذكير بسيط بقسط ${st.n}: عليك ${nf(due)} ${U()} (${nf(due*st.a*sh(ui))} جنيه). ربنا يبارك فيك 🤝`;
+ const t=`السلام عليكم يا ${u}، تذكير بسيط بقسط ${st.n}: عليك ${nf(due)} ${U()} (${nf(due*st.a*sh(ui))} جنيه${st.fee?" + غرامة "+nf(due*st.fee):""}). ربنا يبارك فيك 🤝`;
  window.open("https://wa.me/"+String(st.ph[u]).replace(/^0/,"20").replace(/\D/g,"")+"?text="+encodeURIComponent(t),"_blank")};
 $("t1").onclick=()=>{$("months").classList.remove("hide");$("members").classList.add("hide");$("t1").classList.add("on");$("t2").classList.remove("on")};
 $("t2").onclick=()=>{$("months").classList.add("hide");$("members").classList.remove("hide");$("t2").classList.add("on");$("t1").classList.remove("on")};
