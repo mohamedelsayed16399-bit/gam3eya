@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>جمعيتي - دفتر الجمعية الذكي</title>
+<meta name="description" content="نظّم جمعيتك مع أصحابك: قرعة، دور كل واحد، مين دفع ومين لسه، وابعت الكشف على واتساب.">
+<meta property="og:title" content="جمعيتي - دفتر الجمعية الذكي">
+<meta property="og:description" content="قرعة، دور كل واحد، مين دفع ومين لسه. ببلاش وبدون تسجيل.">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D8%AC%D9%85%D8%B9%D9%8A%D8%AA%D9%8A%22%2C%22short_name%22%3A%22%D8%AC%D9%85%D8%B9%D9%8A%D8%AA%D9%8A%22%2C%22display%22%3A%22standalone%22%2C%22dir%22%3A%22rtl%22%2C%22lang%22%3A%22ar%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f1e8%22%2C%22theme_color%22%3A%22%230f7b5f%22%7D">
+<meta name="theme-color" content="#0f7b5f">
+<style>
+:root{--g:#0f7b5f;--g2:#0a5a46;--y:#f5b82e;--bg:#f4f1e8;--c:#fff;--t:#1d2b27;--m:#6b7a75;--r:#d64545}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--t);line-height:1.5}
+header{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;padding:22px 16px 30px;text-align:center}
+header h1{margin:0;font-size:28px}header p{margin:4px 0 0;opacity:.9;font-size:14px}
+main{max-width:640px;margin:-18px auto 40px;padding:0 12px}
+.card{background:var(--c);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0001}
+h2{margin:0 0 10px;font-size:18px}
+label{display:block;font-size:13px;color:var(--m);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px;border:1.5px solid #d9d9cf;border-radius:10px;font:inherit;background:#fff}
+input:focus{outline:none;border-color:var(--g)}
+button{font:inherit;border:0;border-radius:10px;padding:11px 16px;background:var(--g);color:#fff;cursor:pointer;font-weight:700}
+button.sec{background:#e8efe9;color:var(--g2)}button.warn{background:#fbe4e4;color:var(--r)}button.y{background:var(--y);color:#3a2c00}
+button:active{transform:scale(.97)}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+.names{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:#e8efe9;border-radius:20px;padding:5px 12px;font-size:14px;display:flex;gap:6px;align-items:center}
+.chip b{cursor:pointer;color:var(--r)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stat{background:#f4f8f5;border-radius:12px;padding:10px 4px}.stat b{display:block;font-size:19px;color:var(--g2)}.stat span{font-size:12px;color:var(--m)}
+.bar{height:10px;background:#e4e8e3;border-radius:6px;overflow:hidden;margin:10px 0 2px}.bar i{display:block;height:100%;background:var(--g);transition:width .4s}
+.month{border:1.5px solid #e4e8e3;border-radius:14px;margin-bottom:10px;overflow:hidden}
+.month.cur{border-color:var(--y);box-shadow:0 0 0 2px #f5b82e55}
+.month.done{opacity:.75}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f4f8f5;font-weight:700;cursor:pointer}
+.mh small{font-weight:400;color:var(--m)}
+.mb{padding:6px 12px 10px}
+.p{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #e4e8e3}
+.p:last-child{border:0}
+.tg{width:46px;height:26px;border-radius:14px;background:#ccd3cf;position:relative;cursor:pointer;flex:none;transition:.2s}
+.tg::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
+.tg.on{background:var(--g)}.tg.on::after{right:23px}
+.recv{background:var(--y);color:#3a2c00;border-radius:8px;padding:1px 8px;font-size:12px;margin-right:6px}
+.draw{font-size:34px;text-align:center;padding:18px;font-weight:800;color:var(--g2);min-height:80px}
+.hint{font-size:12.5px;color:var(--m)}
+.ro{background:#fff7dd;border:1.5px solid var(--y);border-radius:12px;padding:10px;font-size:13px;margin-bottom:12px}
+.hide{display:none}
+footer{text-align:center;color:var(--m);font-size:12px;padding:0 0 30px}
+body.dk{--bg:#101a17;--c:#1a2824;--t:#e6efeb;--m:#93a8a0}
+body.dk input,body.dk select{background:#14201c;color:var(--t);border-color:#2c403a}
+body.dk .stat,body.dk .mh{background:#213530}body.dk .chip{background:#26403a}body.dk button.sec{background:#26403a;color:#bfe9d9}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;background:#e8efe9;color:var(--g2)}.tabs button.on{background:var(--g);color:#fff}
+body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{background:var(--g);color:#fff}
+.mem{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #cfd6d1;gap:8px}
+.mem small{color:var(--m);display:block}.mem button{padding:7px 10px;font-size:13px;flex:none}
+.top{display:flex;gap:8px;margin-bottom:12px}.top select{flex:3}.top button{flex:1;padding:8px}
+.rc{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:8px;color:var(--m)}
+@media print{header,button,.noprint{display:none!important}.month .mb{display:block!important}}
+</style>
+</head>
+<body>
+<header><h1>🤝 جمعيتي</h1><p>دفتر الجمعية بتاعك. قرعة، أدوار، ومين دفع. ببلاش وبدون تسجيل.</p></header>
+<main>
+<div class="top noprint"><select id="sw"></select><button id="newc" class="sec">+ جديدة</button><button id="dk" class="sec">🌙</button></div>
+<div id="ro" class="ro hide">🔒 ده كشف للقراءة فقط جاي من صاحب الجمعية. اللي تعدله هنا مش بيتحفظ.</div>
+
+<section id="setup" class="card">
+<h2>جمعية جديدة</h2>
+<label>اسم الجمعية</label><input id="gname" placeholder="مثلاً: جمعية الشلة">
+<div class="row"><div><label>المبلغ الشهري لكل واحد (جنيه)</label><input id="gamt" type="number" inputmode="numeric" placeholder="1000"></div>
+<div><label>تبدأ من شهر</label><input id="gstart" type="month"></div></div>
+<label>الأعضاء (اكتب الاسم، ولو عايز تفكّر المتأخر على واتساب اكتب رقمه بعد الاسم: سارة 01012345678)</label>
+<div class="row"><input id="nm" placeholder="اسم العضو" style="flex:3"><button id="addn" class="sec" style="flex:1">+ إضافة</button></div>
+<div id="names" class="names"></div>
+<p class="hint">كل عضو بيقبض مرة واحدة، يعني عدد الشهور = عدد الأعضاء.</p>
+<label>ترتيب القبض</label>
+<select id="ord"><option value="rand">قرعة عشوائية 🎲</option><option value="list">زي ترتيب الكتابة</option></select>
+<button id="go" style="width:100%;margin-top:14px">ابدأ الجمعية</button>
+</section>
+
+<section id="draw" class="card hide"><h2>🎲 القرعة</h2><div id="dtxt" class="draw">...</div></section>
+
+<section id="app" class="hide">
+<div class="card">
+<h2 id="title"></h2>
+<div class="stats"><div class="stat"><b id="s1"></b><span>القبضة الشهرية</span></div><div class="stat"><b id="s2"></b><span>الشهر الحالي</span></div><div class="stat"><b id="s3"></b><span>متأخر</span></div></div>
+<div class="bar"><i id="bar"></i></div><div class="hint" id="barT"></div>
+</div>
+<div class="tabs noprint"><button id="t1" class="on">الشهور</button><button id="t2">الأعضاء</button></div>
+<div id="months"></div><div id="members" class="card hide"></div>
+<div class="card noprint">
+<h2>مشاركة</h2>
+<div class="row"><button id="wa" class="y">كشف على واتساب</button><button id="lnk" class="sec">نسخ رابط للقراءة</button></div>
+<div class="row" style="margin-top:8px"><button id="csv" class="sec">تصدير Excel</button><button id="prt" class="sec">طباعة / PDF</button><button id="rst" class="warn">حذف الجمعية دي</button></div>
+<p class="hint" id="msg"></p>
+<p class="hint">البيانات محفوظة في موبايلك بس. رابط القراءة بيحمل البيانات جواه، فمفيش سيرفر ولا حد يشوف حاجة غير اللي تبعتله الرابط.</p>
+</div>
+</section>
+</main>
+<footer>جمعيتي · نصيحة: اكتب شروط الجمعية مع أصحابك قبل ما تبدأ</footer>
+<script>
+const $=id=>document.getElementById(id);
+const AR=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const nf=n=>Number(n).toLocaleString("ar-EG");
+const KEY="gam3eya_v1";
+let phones={},st=null,names=[],ro=false,open=new Set();
+const now=new Date();
+$("gstart").value=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function dec(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";return JSON.parse(decodeURIComponent(escape(atob(s))))}
+let db={cur:null,l:{}};
+function loadDb(){try{const s=localStorage.getItem(KEY+"_db");if(s)db=JSON.parse(s);else{const o=localStorage.getItem(KEY);if(o){const x=JSON.parse(o);db={cur:"c1",l:{c1:x}}}}}catch(e){}}
+function save(){if(ro)return;try{if(!db.cur)db.cur="c"+Date.now()+Math.random().toString(36).slice(2,6);db.l[db.cur]=st;localStorage.setItem(KEY+"_db",JSON.stringify(db))}catch(e){}}
+function fillSw(){const ids=Object.keys(db.l);$("sw").innerHTML=ids.map(i=>`<option value="${i}" ${i===db.cur?"selected":""}>${esc(db.l[i].n)}</option>`).join("")||"<option>لا توجد جمعيات</option>"}
+$("sw").onchange=()=>{db.cur=$("sw").value;st=db.l[db.cur];localStorage.setItem(KEY+"_db",JSON.stringify(db));show()};
+$("newc").onclick=()=>{if(ro){location.href=location.pathname;return}db.cur=null;st=null;names=[];renderNames();$("app").classList.add("hide");$("setup").classList.remove("hide");window.scrollTo(0,0)};
+$("dk").onclick=()=>{document.body.classList.toggle("dk");try{localStorage.setItem("g_dk",document.body.classList.contains("dk")?1:0)}catch(e){}};
+try{if(localStorage.getItem("g_dk")==="1")document.body.classList.add("dk")}catch(e){}
+function mlabel(i){const [y,m]=st.start.split("-").map(Number);const d=new Date(y,m-1+i,1);return AR[d.getMonth()]+" "+d.getFullYear()}
+function curIdx(){const [y,m]=st.start.split("-").map(Number);const i=(now.getFullYear()-y)*12+now.getMonth()-(m-1);return i}
+function renderNames(){$("names").innerHTML=names.map((n,i)=>`<span class="chip">${esc(n)} <b data-i="${i}">×</b></span>`).join("")}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function addName(){let v=$("nm").value.trim();if(!v)return;const mm=v.match(/^(.*?)[\s:،-]*([0-9٠-٩+]{8,15})$/);if(mm&&mm[1].trim()){const ph=mm[2].replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));phones[mm[1].trim()]=ph;v=mm[1].trim()}if(names.includes(v)){$("nm").value="";return}names.push(v);$("nm").value="";renderNames();$("nm").focus()}
+$("addn").onclick=addName;$("nm").onkeydown=e=>{if(e.key==="Enter")addName()};
+$("names").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined){delete phones[names[+i]];names.splice(+i,1);renderNames()}};
+$("go").onclick=()=>{
+ const amt=+$("gamt").value;
+ if(names.length<2)return alert("ضيف عضوين على الأقل");
+ if(!(amt>0))return alert("اكتب المبلغ الشهري");
+ const order=names.map((_,i)=>i);
+ const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones};save();fillSw();show()};
+ if($("ord").value==="rand"){
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  $("setup").classList.add("hide");$("draw").classList.remove("hide");
+  let k=0,t=setInterval(()=>{$("dtxt").textContent=names[Math.floor(Math.random()*names.length)];if(++k>18){clearInterval(t);$("dtxt").textContent="تمت القرعة ✅";setTimeout(()=>{$("draw").classList.add("hide");make(order)},700)}},90);
+ }else make(order);
+};
+function paidCount(mi){let c=0;st.m.forEach((_,u)=>{if(st.p[mi+"_"+u])c++});return c}
+function show(){
+ $("setup").classList.add("hide");$("draw").classList.add("hide");$("app").classList.remove("hide");st.r=st.r||{};st.ph=st.ph||{};renderMembers();
+ const n=st.m.length,ci=curIdx();
+ $("title").textContent=st.n+" · "+nf(n)+" أعضاء";
+ $("s1").textContent=nf(st.a*n)+" ج";
+ $("s2").textContent=ci<0?"لسه":ci>=n?"خلصت":nf(ci+1)+" من "+nf(n);
+ let late=0;for(let mi=0;mi<n&&mi<=ci;mi++)late+=n-paidCount(mi);
+ $("s3").textContent=nf(late);
+ let tot=0;for(let mi=0;mi<n;mi++)tot+=paidCount(mi);
+ $("bar").style.width=Math.round(tot/(n*n)*100)+"%";
+ $("barT").textContent="اتدفع "+nf(tot)+" دفعة من "+nf(n*n);
+ let h="";
+ for(let mi=0;mi<n;mi++){
+  const rcv=st.m[st.o[mi]],pc=paidCount(mi),full=pc===n,isCur=mi===ci;
+  const op=open.has(mi)||(isCur&&!open.has("x"+mi));
+  h+=`<div class="month ${isCur?"cur":""} ${full?"done":""}"><div class="mh" data-m="${mi}"><span>${nf(mi+1)}. ${mlabel(mi)} <small>يقبض: <span class="recv">${esc(rcv)}</span></small></span><span>${full?"✅":nf(pc)+"/"+nf(n)}</span></div>
+  <div class="mb ${op?"":"hide"}">`+st.m.map((u,ui)=>`<div class="p"><span>${esc(u)}${ui===st.o[mi]?' <small class="hint">(بياخد)</small>':""}</span><div class="tg ${st.p[mi+"_"+ui]?"on":""}" data-k="${mi}_${ui}"></div></div>`).join("")+`<div class="rc"><div class="tg ${st.r[mi]?"on":""}" data-r="${mi}"></div>${esc(rcv)} استلم القبضة؟</div><div class="hint" style="margin-top:6px">المطلوب ${nf(st.a)} ج من كل واحد · اتجمع ${nf(pc*st.a)} ج</div></div></div>`;
+ }
+ $("months").innerHTML=h;
+}
+$("months").onclick=e=>{
+ const rg=e.target.closest("[data-r]");if(rg){const k=rg.dataset.r;if(st.r[k])delete st.r[k];else st.r[k]=1;save();show();return}
+ const tg=e.target.closest(".tg");
+ if(tg){const k=tg.dataset.k;if(st.p[k])delete st.p[k];else st.p[k]=1;save();show();return}
+ const mh=e.target.closest(".mh");
+ if(mh){const mi=+mh.dataset.m,ci=curIdx(),cur=mi===ci;const b=mh.nextElementSibling;const isOpen=!b.classList.contains("hide");
+  if(isOpen){open.delete(mi);if(cur)open.add("x"+mi)}else{open.add(mi);open.delete("x"+mi)}
+  b.classList.toggle("hide")}
+};
+function renderMembers(){
+ const n=st.m.length,ci=Math.min(curIdx(),n-1);let h="<h2>حساب كل عضو</h2>";
+ st.m.forEach((u,ui)=>{let paid=0,due=0;for(let mi=0;mi<n;mi++){if(st.p[mi+"_"+ui])paid++;else if(mi<=ci)due++}
+  const pos=st.o.indexOf(ui);const ph=st.ph[u];
+  h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${mlabel(pos)} · دفع ${nf(paid)} من ${nf(n)}</small><small>${due?"متأخر عليه "+nf(due)+" شهر = "+nf(due*st.a)+" ج":"مفيش متأخرات ✅"}</small></div>${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}</div>`});
+ $("members").innerHTML=h}
+$("members").onclick=e=>{const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),n-1);let due=0;for(let mi=0;mi<=ci;mi++)if(!st.p[mi+"_"+ui])due++;
+ const t=`السلام عليكم يا ${u}، تذكير بسيط بقسط ${st.n}: عليك ${nf(due)} شهر (${nf(due*st.a)} جنيه). ربنا يبارك فيك 🤝`;
+ window.open("https://wa.me/"+String(st.ph[u]).replace(/^0/,"20").replace(/\D/g,"")+"?text="+encodeURIComponent(t),"_blank")};
+$("t1").onclick=()=>{$("months").classList.remove("hide");$("members").classList.add("hide");$("t1").classList.add("on");$("t2").classList.remove("on")};
+$("t2").onclick=()=>{$("months").classList.add("hide");$("members").classList.remove("hide");$("t2").classList.add("on");$("t1").classList.remove("on")};
+$("csv").onclick=()=>{const n=st.m.length;let r=[["الشهر","يقبض","مدفوع","استلم"].concat(st.m)];for(let mi=0;mi<n;mi++)r.push([mlabel(mi),st.m[st.o[mi]],paidCount(mi)+"/"+n,st.r[mi]?"نعم":"لا"].concat(st.m.map((_,u)=>st.p[mi+"_"+u]?"✓":"")));
+ const blob=new Blob(["\ufeff"+r.map(x=>x.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="gam3eya.csv";a.click()};
+function report(){
+ const n=st.m.length,ci=Math.min(Math.max(curIdx(),0),n-1);
+ let t=`🤝 *${st.n}*\nالقبضة: ${nf(st.a*n)} ج · ${nf(n)} أعضاء\n\n📅 شهر ${mlabel(ci)}\nيقبض: *${st.m[st.o[ci]]}*\n`;
+ const paid=[],un=[];st.m.forEach((u,i)=>(st.p[ci+"_"+i]?paid:un).push(u));
+ t+=`✅ دفعوا (${nf(paid.length)}): ${paid.join("، ")||"لسه محدش"}\n`;
+ t+=`⏳ لسه (${nf(un.length)}): ${un.join("، ")||"محدش، الكل دفع 🎉"}\n\n`;
+ t+="الدور الجاي: "+(st.o[ci+1]!==undefined?`${st.m[st.o[ci+1]]} (${mlabel(ci+1)})`:"الجمعية خلصت");
+ return t;
+}
+$("wa").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(report()+"\n\nجمعيتي: "+location.origin+location.pathname),"_blank");
+$("lnk").onclick=async()=>{
+ const u=location.origin+location.pathname+"#v="+enc(st);
+ try{await navigator.clipboard.writeText(u);$("msg").textContent="اتنسخ رابط القراءة ✅ ابعته في الجروب."}catch(e){prompt("انسخ الرابط:",u)}
+};
+$("prt").onclick=()=>{document.querySelectorAll(".mb").forEach(b=>b.classList.remove("hide"));print()};
+$("rst").onclick=()=>{if(confirm("متأكد؟ هتمسح الجمعية دي من الموبايل ده.")){delete db.l[db.cur];db.cur=Object.keys(db.l)[0]||null;localStorage.setItem(KEY+"_db",JSON.stringify(db));location.hash="";location.reload()}};
+(function init(){
+ const m=location.hash.match(/^#v=(.+)$/);
+ if(m){try{st=dec(m[1]);ro=true;$("ro").classList.remove("hide");show();return}catch(e){}}
+ loadDb();fillSw();if(db.cur&&db.l[db.cur]){st=db.l[db.cur];show()}
+})();
+</script>
+</body>
+</html>
