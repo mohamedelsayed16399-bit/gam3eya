@@ -66,6 +66,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <div class="top noprint"><select id="sw"></select><button id="newc" class="sec">+ جديدة</button><button id="dk" class="sec">🌙</button></div>
 <div id="ro" class="ro hide">🔒 ده كشف للقراءة فقط جاي من صاحب الجمعية. اللي تعدله هنا مش بيتحفظ.</div>
 
+<section id="how" class="card"><h2>إزاي الجمعية بتشتغل؟</h2><p class="hint" style="font-size:14px;margin:0">كل واحد بيدفع نفس المبلغ كل شهر، وكل شهر واحد بيقبض الإجمالي. بعد ما كل الأعضاء يقبضوا، الجمعية بتخلص. هنا بتعمل القرعة، وتتابع مين دفع ومين لسه، وتبعت كشف واضح للجروب بدل ما كله يسأل "مين دفع؟".</p></section>
 <section id="setup" class="card">
 <h2>جمعية جديدة</h2>
 <label>اسم الجمعية</label><input id="gname" placeholder="مثلاً: جمعية الشلة">
@@ -78,6 +79,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <p class="hint">كل عضو بيقبض مرة واحدة، يعني عدد الشهور = عدد الأعضاء.</p>
 <label>ترتيب القبض</label>
 <select id="ord"><option value="rand">قرعة عشوائية 🎲</option><option value="list">زي ترتيب الكتابة</option></select>
+<label>شروط وملاحظات الجمعية (اختياري)</label><textarea id="grules" rows="2" placeholder="مثلاً: التأخير بعد يوم ٥ بغرامة ٥٠ جنيه. الأمين: أحمد"></textarea>
 <button id="go" style="width:100%;margin-top:14px">ابدأ الجمعية</button>
 <button id="demo" class="sec" style="width:100%;margin-top:8px">🎯 جرّب بمثال جاهز</button>
 </section>
@@ -91,6 +93,8 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <div class="bar"><i id="bar"></i></div><div class="hint" id="barT"></div>
 </div>
 <div class="tabs noprint"><button id="t1" class="on">الشهور</button><button id="t2">الأعضاء</button></div>
+<div id="rules" class="ro noprint hide" style="background:#eef7f2;border-color:#9fd3bd"></div>
+<div class="row noprint" style="margin-bottom:10px"><button id="undo" class="sec">↩️ تراجع</button><button id="img" class="sec">🖼️ صورة الكشف</button></div>
 <div id="months"></div><div id="members" class="card hide"></div>
 <div class="card noprint">
 <h2>مشاركة</h2>
@@ -115,10 +119,11 @@ function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).rep
 function dec(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";return JSON.parse(decodeURIComponent(escape(atob(s))))}
 let db={cur:null,l:{}};
 function loadDb(){try{const s=localStorage.getItem(KEY+"_db");if(s)db=JSON.parse(s);else{const o=localStorage.getItem(KEY);if(o){const x=JSON.parse(o);db={cur:"c1",l:{c1:x}}}}}catch(e){}}
+let hist=[];function snap(){hist.push(JSON.stringify({p:st.p,r:st.r,o:st.o}));if(hist.length>30)hist.shift()}
 function save(){if(ro)return;try{if(!db.cur)db.cur="c"+Date.now()+Math.random().toString(36).slice(2,6);db.l[db.cur]=st;localStorage.setItem(KEY+"_db",JSON.stringify(db))}catch(e){}}
 function fillSw(){const ids=Object.keys(db.l);$("sw").innerHTML=ids.map(i=>`<option value="${i}" ${i===db.cur?"selected":""}>${esc(db.l[i].n)}</option>`).join("")||"<option>لا توجد جمعيات</option>"}
 $("sw").onchange=()=>{db.cur=$("sw").value;st=db.l[db.cur];localStorage.setItem(KEY+"_db",JSON.stringify(db));show()};
-$("newc").onclick=()=>{if(ro){location.href=location.pathname;return}db.cur=null;st=null;names=[];renderNames();$("app").classList.add("hide");$("setup").classList.remove("hide");window.scrollTo(0,0)};
+$("newc").onclick=()=>{$("how").classList.remove("hide");if(ro){location.href=location.pathname;return}db.cur=null;st=null;names=[];renderNames();$("app").classList.add("hide");$("setup").classList.remove("hide");window.scrollTo(0,0)};
 $("dk").onclick=()=>{document.body.classList.toggle("dk");try{localStorage.setItem("g_dk",document.body.classList.contains("dk")?1:0)}catch(e){}};
 try{if(localStorage.getItem("g_dk")==="1")document.body.classList.add("dk")}catch(e){}
 function mlabel(i){const [y,m]=st.start.split("-").map(Number);const d=new Date(y,m-1+i,1);return AR[d.getMonth()]+" "+String(d.getFullYear()).replace(/\d/g,x=>"٠١٢٣٤٥٦٧٨٩"[x])}
@@ -141,7 +146,7 @@ $("go").onclick=()=>{
  if(names.length<2)return alert("ضيف عضوين على الأقل");
  if(!(amt>0))return alert("اكتب المبلغ الشهري");
  const order=names.map((_,i)=>i);
- const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones,d:+$("gdue").value};save();fillSw();show()};
+ const make=o=>{st={n:$("gname").value.trim()||"الجمعية",a:amt,start:$("gstart").value,m:names.slice(),o:o,p:{},r:{},ph:phones,d:+$("gdue").value,q:$("grules").value.trim()};save();fillSw();show()};
  if($("ord").value==="rand"){
   for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
   $("setup").classList.add("hide");$("draw").classList.remove("hide");
@@ -150,7 +155,7 @@ $("go").onclick=()=>{
 };
 function paidCount(mi){let c=0;st.m.forEach((_,u)=>{if(st.p[mi+"_"+u])c++});return c}
 function show(){
- $("setup").classList.add("hide");$("draw").classList.add("hide");$("app").classList.remove("hide");st.r=st.r||{};st.ph=st.ph||{};renderMembers();
+ $("setup").classList.add("hide");$("how").classList.add("hide");$("draw").classList.add("hide");$("app").classList.remove("hide");$("rules").textContent=st.q?"📌 "+st.q:"";$("rules").classList.toggle("hide",!st.q);st.r=st.r||{};st.ph=st.ph||{};renderMembers();
  const n=st.m.length,ci=curIdx();
  $("title").textContent=st.n+" · "+nf(n)+" أعضاء";
  $("s1").textContent=nf(st.a*n)+" ج";
@@ -165,14 +170,15 @@ function show(){
   const rcv=st.m[st.o[mi]],pc=paidCount(mi),full=pc===n,isCur=mi===ci;
   const op=open.has(mi)||(isCur&&!open.has("x"+mi));
   h+=`<div class="month ${isCur?"cur":""} ${full?"done":""}"><div class="mh" data-m="${mi}"><span>${nf(mi+1)}. ${mlabel(mi)} <small>يقبض: <span class="recv">${esc(rcv)}</span></small></span><span>${full?"✅":nf(pc)+"/"+nf(n)}</span></div>
-  <div class="mb ${op?"":"hide"}">`+st.m.map((u,ui)=>`<div class="p"><span>${esc(u)}${ui===st.o[mi]?' <small class="hint">(بياخد)</small>':""}</span><div class="tg ${st.p[mi+"_"+ui]?"on":""}" data-k="${mi}_${ui}"></div></div>`).join("")+`<div class="rc"><div class="tg ${st.r[mi]?"on":""}" data-r="${mi}"></div>${esc(rcv)} استلم القبضة؟</div><div class="hint" style="margin-top:6px">المطلوب ${nf(st.a)} ج من كل واحد · اتجمع ${nf(pc*st.a)} ج</div></div></div>`;
+  <div class="mb ${op?"":"hide"}">`+st.m.map((u,ui)=>`<div class="p"><span>${esc(u)}${ui===st.o[mi]?' <small class="hint">(بياخد)</small>':""}</span><div class="tg ${st.p[mi+"_"+ui]?"on":""}" data-k="${mi}_${ui}"></div></div>`).join("")+`<div class="rc"><button class="sec" data-all="${mi}" style="padding:5px 10px;font-size:12px">${full?"إلغاء الكل":"الكل دفع"}</button></div><div class="rc"><div class="tg ${st.r[mi]?"on":""}" data-r="${mi}"></div>${esc(rcv)} استلم القبضة؟</div><div class="hint" style="margin-top:6px">المطلوب ${nf(st.a)} ج من كل واحد · اتجمع ${nf(pc*st.a)} ج</div></div></div>`;
  }
  $("months").innerHTML=h;
 }
 $("months").onclick=e=>{
- const rg=e.target.closest("[data-r]");if(rg){const k=rg.dataset.r;if(st.r[k])delete st.r[k];else st.r[k]=1;save();show();return}
+ const ma=e.target.closest("[data-all]");if(ma){snap();const mi=ma.dataset.all;const full=paidCount(+mi)===st.m.length;st.m.forEach((_,u)=>{if(full)delete st.p[mi+"_"+u];else st.p[mi+"_"+u]=1});save();show();return}
+ const rg=e.target.closest("[data-r]");if(rg){snap();const k=rg.dataset.r;if(st.r[k])delete st.r[k];else st.r[k]=1;save();show();return}
  const tg=e.target.closest(".tg");
- if(tg){const k=tg.dataset.k;if(st.p[k])delete st.p[k];else st.p[k]=1;save();show();return}
+ if(tg){snap();const k=tg.dataset.k;if(st.p[k])delete st.p[k];else st.p[k]=1;save();show();return}
  const mh=e.target.closest(".mh");
  if(mh){const mi=+mh.dataset.m,ci=curIdx(),cur=mi===ci;const b=mh.nextElementSibling;const isOpen=!b.classList.contains("hide");
   if(isOpen){open.delete(mi);if(cur)open.add("x"+mi)}else{open.add(mi);open.delete("x"+mi)}
@@ -184,7 +190,7 @@ function renderMembers(){
   const pos=st.o.indexOf(ui);const ph=st.ph[u];
   h+=`<div class="mem"><div><b>${esc(u)}</b><small>دوره: ${mlabel(pos)} · دفع ${nf(paid)} من ${nf(n)}</small><small>${due?"متأخر عليه "+nf(due)+" شهر = "+nf(due*st.a)+" ج":"مفيش متأخرات ✅"}</small></div><div style="display:flex;gap:4px;align-items:center">${due&&ph?`<button data-rem="${ui}" class="y">⏰ فكّره</button>`:""}<button class="sec" data-mv="${ui}_-1" title="قدّم دوره">▲</button><button class="sec" data-mv="${ui}_1" title="أخّر دوره">▼</button></div></div>`});
  $("members").innerHTML=h}
-$("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [u,dir]=mv.dataset.mv.split("_").map(Number);const a=st.o.indexOf(u),b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
+$("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [u,dir]=mv.dataset.mv.split("_").map(Number);const a=st.o.indexOf(u),b=a+dir;if(b<0||b>=st.o.length)return;if(st.r[a]||st.r[b])return alert("مينفعش تبدّل دور حد استلم خلاص");snap();[st.o[a],st.o[b]]=[st.o[b],st.o[a]];save();show();return}
  const b=e.target.closest("[data-rem]");if(!b)return;const ui=+b.dataset.rem,u=st.m[ui],n=st.m.length,ci=Math.min(curIdx(),n-1);let due=0;for(let mi=0;mi<=lastDue(ci);mi++)if(!st.p[mi+"_"+ui])due++;
  const t=`السلام عليكم يا ${u}، تذكير بسيط بقسط ${st.n}: عليك ${nf(due)} شهر (${nf(due*st.a)} جنيه). ربنا يبارك فيك 🤝`;
  window.open("https://wa.me/"+String(st.ph[u]).replace(/^0/,"20").replace(/\D/g,"")+"?text="+encodeURIComponent(t),"_blank")};
@@ -201,6 +207,16 @@ function report(){
  t+="الدور الجاي: "+(st.o[ci+1]!==undefined?`${st.m[st.o[ci+1]]} (${mlabel(ci+1)})`:"الجمعية خلصت");
  return t;
 }
+$("undo").onclick=()=>{if(!hist.length)return alert("مفيش حاجة تتراجع عنها");const h=JSON.parse(hist.pop());st.p=h.p;st.r=h.r;st.o=h.o;save();show()};
+$("img").onclick=()=>{const n=st.m.length,ci=Math.min(Math.max(curIdx(),0),n-1);const rows=st.m.map((u,i)=>[u,!!st.p[ci+"_"+i]]);
+ const W=720,H=340+rows.length*58,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";x.textAlign="right";
+ x.fillStyle="#f4f1e8";x.fillRect(0,0,W,H);x.fillStyle="#0f7b5f";x.fillRect(0,0,W,150);
+ x.fillStyle="#fff";x.font="bold 44px sans-serif";x.fillText(st.n,W-40,70);x.font="26px sans-serif";x.fillText(mlabel(ci)+" · القبضة "+nf(st.a*n)+" ج",W-40,115);
+ x.fillStyle="#1d2b27";x.font="28px sans-serif";x.fillText("يقبض: "+st.m[st.o[ci]],W-40,200);
+ rows.forEach((r,i)=>{const y=275+i*58;x.fillStyle=r[1]?"#e1f3ea":"#fde9e9";x.fillRect(30,y-34,W-60,50);x.fillStyle="#1d2b27";x.font="26px sans-serif";x.textAlign="right";x.fillText(r[0],W-50,y);x.textAlign="left";x.fillStyle=r[1]?"#0f7b5f":"#d64545";x.fillText(r[1]?"دفع ✓":"لسه ✗",50,y);x.textAlign="right"});
+ x.fillStyle="#6b7a75";x.font="20px sans-serif";x.textAlign="center";x.fillText("جمعيتي",W/2,H-14);
+ c.toBlob(async b=>{const f=new File([b],"gam3eya.png",{type:"image/png"});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:st.n});return}}catch(e){}
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="gam3eya.png";a.click()})};
 $("wa").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(report()+"\n\nجمعيتي: "+location.origin+location.pathname),"_blank");
 $("lnk").onclick=async()=>{
  const u=location.origin+location.pathname+"#v="+enc(st);
