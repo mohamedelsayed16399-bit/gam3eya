@@ -249,6 +249,7 @@ $("rst").onclick=()=>{if(confirm("متأكد؟ هتمسح الجمعية دي م
  if(m){try{st=dec(m[1]);ro=true;$("ro").classList.remove("hide");show();return}catch(e){}}
  loadDb();fillSw();if(db.cur&&db.l[db.cur]){st=db.l[db.cur];show()}
 })();
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>
