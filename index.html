@@ -53,7 +53,7 @@ button:active{transform:scale(.97)}
 footer{text-align:center;color:var(--m);font-size:12px;padding:0 0 30px}
 body.dk{--bg:#101a17;--c:#1a2824;--t:#e6efeb;--m:#93a8a0}
 body.dk input,body.dk select{background:#14201c;color:var(--t);border-color:#2c403a}
-body.dk .stat b{color:#7fe0bf}body.dk h2,body.dk .mh{color:var(--t)}body.dk .month{border-color:#2c403a}body.dk .mem{border-color:#2c403a}body.dk .p{border-color:#2c403a}body.dk .recv{color:#3a2c00}body.dk .stat,body.dk .mh{background:#213530}body.dk .chip{background:#26403a}body.dk button.sec{background:#26403a;color:#bfe9d9}
+body.dk .sc.g{background:#1f4a3a;color:#9ff0cf}body.dk .sc.m{background:#4a3f12;color:#ffe08a}body.dk .sc.b{background:#4d2323;color:#ffb3b3}body.dk .ro{background:#2b2a14;color:var(--t)}body.dk #rules{background:#17302a!important;border-color:#2c5a4a!important}body.dk .recv{color:#3a2c00}body.dk .stat b{color:#7fe0bf}body.dk h2,body.dk .mh{color:var(--t)}body.dk .month{border-color:#2c403a}body.dk .mem{border-color:#2c403a}body.dk .p{border-color:#2c403a}body.dk .recv{color:#3a2c00}body.dk .stat,body.dk .mh{background:#213530}body.dk .chip{background:#26403a}body.dk button.sec{background:#26403a;color:#bfe9d9}
 .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;background:#e8efe9;color:var(--g2)}.tabs button.on{background:var(--g);color:#fff}
 body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{background:var(--g);color:#fff}
 .mem{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #cfd6d1;gap:8px}
@@ -82,7 +82,8 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <label>الأعضاء (اكتب الاسم. لو واحد واخد حصتين اكتب سارة x2. ولو عايز تفكّره على واتساب اكتب رقمه: سارة 01012345678)</label>
 <div class="row"><input id="nm" placeholder="اسم العضو" style="flex:3"><button id="addn" class="sec" style="flex:1">+ إضافة</button></div>
 <div id="names" class="names"></div>
-<p class="hint">كل عضو بيقبض مرة واحدة، يعني عدد الشهور = عدد الأعضاء.</p>
+<p class="hint">كل حصة بتقبض مرة واحدة، يعني عدد الشهور (أو الأسابيع) = عدد الحصص.</p>
+<div id="prev" class="ro" style="background:#eef7f2;border-color:#9fd3bd">ضيف الأعضاء وهتشوف الملخص هنا.</div>
 <label>ترتيب القبض</label>
 <select id="ord"><option value="rand">قرعة عشوائية 🎲</option><option value="list">زي ترتيب الكتابة</option></select>
 <label>غرامة التأخير لكل فترة تأخير (جنيه، اختياري)</label><input id="gfee" type="number" inputmode="numeric" placeholder="0">
@@ -107,7 +108,7 @@ body.dk .tabs button{background:#26403a;color:#bfe9d9}body.dk .tabs button.on{ba
 <h2>مشاركة</h2>
 <div class="row"><button id="wa" class="y">كشف على واتساب</button><button id="lnk" class="sec">نسخ رابط للقراءة</button></div>
 <div class="row" style="margin-top:8px"><button id="bak" class="sec">💾 نسخة احتياطية</button><button id="rstr" class="sec">📂 استرجاع نسخة</button><input id="rf" type="file" accept=".json,application/json" class="hide"></div>
-<div class="row" style="margin-top:8px"><button id="csv" class="sec">تصدير Excel</button><button id="prt" class="sec">طباعة / PDF</button><button id="rst" class="warn">حذف الجمعية دي</button></div>
+<div class="row" style="margin-top:8px"><button id="ics" class="sec">📅 تقويم الموبايل</button><button id="csv" class="sec">تصدير Excel</button><button id="prt" class="sec">طباعة / PDF</button><button id="rst" class="warn">حذف الجمعية دي</button></div>
 <p class="hint" id="msg"></p>
 <p class="hint">البيانات محفوظة في موبايلك بس. رابط القراءة بيحمل البيانات جواه، فمفيش سيرفر ولا حد يشوف حاجة غير اللي تبعتله الرابط.</p>
 </div>
@@ -124,7 +125,7 @@ const KEY="gam3eya_v1";
 let shares={},phones={},st=null,names=[],ro=false,open=new Set();
 const now=new Date();
 $("gsd").value=now.toISOString().slice(0,10);
-$("gfreq").onchange=()=>{const w=$("gfreq").value==="w";$("gstart").classList.toggle("hide",w);$("gsd").classList.toggle("hide",!w);$("duew").classList.toggle("hide",w);$("lst").textContent=w?"تبدأ من يوم":"تبدأ من شهر"};
+$("gamt").oninput=updPrev;$("gfreq").onchange=()=>{updPrev();const w=$("gfreq").value==="w";$("gstart").classList.toggle("hide",w);$("gsd").classList.toggle("hide",!w);$("duew").classList.toggle("hide",w);$("lst").textContent=w?"تبدأ من يوم":"تبدأ من شهر"};
 $("gdue").innerHTML=Array.from({length:28},(_,i)=>`<option value="${i+1}" ${i===0?"selected":""}>يوم ${i+1}</option>`).join("");
 $("gstart").value=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
 function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
@@ -151,7 +152,8 @@ function lastDue(ci){if(st.f==="w")return ci;return (st.d&&ci>=0&&now.getDate()<
 function dueLine(ci,n){if(st.f==="w"&&ci>=0&&ci<n){const t=new Date(now.getFullYear(),now.getMonth(),now.getDate());const left=7-(Math.round((t-sd0())/864e5)%7);return "الأسبوع الجاي بعد "+nf(left)+" يوم ⏳"}if(ci<0)return "الجمعية لسه ما بدأتش";if(ci>=n)return "الجمعية خلصت 🎉";const dd=st.d||1;const dt=new Date(now.getFullYear(),now.getMonth(),dd);const diff=Math.round((dt-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);
  return diff>0?`ميعاد القسط يوم ${nf(dd)}، باقي ${nf(diff)} يوم ⏳`:diff===0?"النهارده ميعاد القسط 📅":`ميعاد القسط كان يوم ${nf(dd)}، عدّى ${nf(-diff)} يوم ⚠️`}
 function curIdx(){if(st.f==="w"){const t=new Date(now.getFullYear(),now.getMonth(),now.getDate());return Math.floor(Math.round((t-sd0())/864e5)/7)}const [y,m]=st.start.split("-").map(Number);const i=(now.getFullYear()-y)*12+now.getMonth()-(m-1);return i}
-function renderNames(){$("names").innerHTML=names.map((n,i)=>`<span class="chip">${esc(n)}${shares[n]>1?" ×"+shares[n]:""} <b data-i="${i}">×</b></span>`).join("")}
+function updPrev(){const n=names.length;let sh=0;names.forEach(u=>sh+=shares[u]||1);const a=+$("gamt").value||0;const w=$("gfreq").value==="w"?"أسبوع":"شهر";$("prev").textContent=n<2?"ضيف عضوين على الأقل وهتشوف الملخص هنا.":`${nf(n)} أعضاء | ${nf(sh)} حصة | الجمعية هتاخد ${nf(sh)} ${w} | كل واحد بيقبض ${a?nf(a*sh)+" جنيه":"..."} | الإجمالي اللي بيتحرك ${a?nf(a*sh*sh)+" جنيه":"..."}`}
+function renderNames(){updPrev();$("names").innerHTML=names.map((n,i)=>`<span class="chip">${esc(n)}${shares[n]>1?" ×"+shares[n]:""} <b data-i="${i}">×</b></span>`).join("")}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function addName(){let v=$("nm").value.trim();if(!v)return;const mm=v.match(/^(.*?)[\s:،-]*([0-9٠-٩+]{8,15})$/);if(mm&&mm[1].trim()){const ph=mm[2].replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));phones[mm[1].trim()]=ph;v=mm[1].trim()}const sm=v.match(/^(.*?)\s*[x×*]\s*([1-4])$/i);if(sm&&sm[1].trim()){v=sm[1].trim();shares[v]=+sm[2]}if(names.includes(v)){$("nm").value="";return}names.push(v);$("nm").value="";renderNames();$("nm").focus()}
 $("addn").onclick=addName;$("nm").onkeydown=e=>{if(e.key==="Enter")addName()};
@@ -217,6 +219,11 @@ $("members").onclick=e=>{const mv=e.target.closest("[data-mv]");if(mv){const [a,
  window.open("https://wa.me/"+String(st.ph[u]).replace(/^0/,"20").replace(/\D/g,"")+"?text="+encodeURIComponent(t),"_blank")};
 $("t1").onclick=()=>{$("months").classList.remove("hide");$("members").classList.add("hide");$("t1").classList.add("on");$("t2").classList.remove("on")};
 $("t2").onclick=()=>{$("months").classList.add("hide");$("members").classList.remove("hide");$("t2").classList.add("on");$("t1").classList.remove("on")};
+$("ics").onclick=()=>{const p2=x=>String(x).padStart(2,"0");const fd=d=>d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate());let L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//gam3eya//AR","CALSCALE:GREGORIAN"];
+ for(let i=0;i<K();i++){let d;if(st.f==="w"){d=sd0();d.setDate(d.getDate()+7*i)}else{const [y,m]=st.start.split("-").map(Number);d=new Date(y,m-1+i,Math.min(st.d||1,28))}
+  const e=new Date(d);e.setDate(e.getDate()+1);
+  L.push("BEGIN:VEVENT","UID:g"+i+"-"+Date.now()+"@gam3eya","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART;VALUE=DATE:"+fd(d),"DTEND;VALUE=DATE:"+fd(e),"SUMMARY:"+("قسط "+st.n+" - يقبض "+st.m[st.o[i]]).replace(/[,;]/g," "),"DESCRIPTION:"+("القسط "+st.a+" جنيه للحصة").replace(/[,;]/g," "),"BEGIN:VALARM","TRIGGER:-P1D","ACTION:DISPLAY","DESCRIPTION:بكرة ميعاد قسط الجمعية","END:VALARM","END:VEVENT")}
+ L.push("END:VCALENDAR");const b=new Blob([L.join("\r\n")],{type:"text/calendar"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="gam3eya.ics";a.click()};
 $("csv").onclick=()=>{const n=st.m.length;let r=[[U(),"يقبض","مدفوع","استلم"].concat(st.m)];for(let mi=0;mi<K();mi++)r.push([mlabel(mi),st.m[st.o[mi]],paidCount(mi)+"/"+n,st.r[mi]?"نعم":"لا"].concat(st.m.map((_,u)=>st.p[mi+"_"+u]?"✓":"")));
  const blob=new Blob(["\ufeff"+r.map(x=>x.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="gam3eya.csv";a.click()};
 function report(){
